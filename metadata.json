@@ -1,0 +1,6 @@
+{
+  "name": "Expense Manager",
+  "description": "Personal expense manager with Google Sheets synchronization and interactive data visualization charts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
