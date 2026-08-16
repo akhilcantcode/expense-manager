@@ -8,6 +8,7 @@ import {
   Sliders,
   DollarSign,
   TrendingDown,
+  Trash2,
 } from 'lucide-react';
 import { BudgetConfig, ExpenseCategory, AnalyticsSummary } from '../types';
 import { CATEGORIES, formatCurrency, getCategoryInfo } from '../utils/helpers';
@@ -45,6 +46,15 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
     });
     setHasSaved(true);
     setTimeout(() => setHasSaved(false), 2500);
+  };
+
+  const handleClearAll = () => {
+    setTotalLimit(0);
+    const clearedCats: Record<string, number> = {};
+    CATEGORIES.forEach((cat) => {
+      clearedCats[cat.label] = 0;
+    });
+    setCategoryLimits(clearedCats);
   };
 
   const totalAllocated: number = (Object.values(categoryLimits) as number[]).reduce(
@@ -86,6 +96,16 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
           </div>
 
           <button
+            id="budget-clear-btn"
+            type="button"
+            onClick={handleClearAll}
+            className="flex items-center space-x-1.5 px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#2A2A2A] border border-[#3A3A3A] text-[#CF6679] hover:bg-[#322022] hover:border-[#CF6679]/30 transition-colors shadow-xs"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Clear Limits</span>
+          </button>
+
+          <button
             id="budget-save-btn"
             onClick={handleSave}
             className="flex items-center space-x-1.5 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#BB86FC] text-black hover:bg-[#A370DB] transition-colors shadow-xs"
@@ -120,7 +140,8 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
               type="number"
               min="0"
               step="50"
-              value={totalLimit}
+              value={totalLimit === 0 ? '' : totalLimit}
+              placeholder="No limit"
               onChange={(e) => setTotalLimit(Number(e.target.value))}
               className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-[#2A2A2A] bg-[#0A0A0A] text-lg font-bold text-[#E5E5E5] focus:outline-none focus:border-[#BB86FC]"
             />
@@ -142,7 +163,10 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
             <div className="flex justify-between text-[#9E9E9E]">
               <span>Remaining Capacity:</span>
               <span className="font-semibold text-[#03DAC6] font-mono">
-                {formatCurrency(Math.max(0, totalLimit - analytics.totalExpense), selectedCurrency)}
+                {totalLimit > 0
+                  ? formatCurrency(Math.max(0, totalLimit - analytics.totalExpense), selectedCurrency)
+                  : "— (No Limit)"
+                }
               </span>
             </div>
           </div>
@@ -164,9 +188,9 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
               (cat) => {
                 const limit = categoryLimits[cat.label] || 0;
                 const spent = analytics.categoryTotals[cat.label] || 0;
-                const percentage = limit > 0 ? (spent / limit) * 100 : spent > 0 ? 100 : 0;
-                const isOver = spent > limit && limit > 0;
-                const isNear = percentage >= 80 && !isOver;
+                const percentage = limit > 0 ? (spent / limit) * 100 : 0;
+                const isOver = limit > 0 && spent > limit;
+                const isNear = limit > 0 && percentage >= 80 && !isOver;
 
                 return (
                   <div
@@ -195,16 +219,23 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                           </span>
                         ) : null}
 
-                        <div className="flex items-center space-x-1 text-xs">
+                        <div className="flex items-center space-x-2 text-xs">
                           <span className="text-[#9E9E9E] font-mono">
-                            {formatCurrency(spent, selectedCurrency)} /
+                            {formatCurrency(spent, selectedCurrency)} spent
+                            {limit > 0 ? ' /' : ' (No target)'}
                           </span>
-                          <div className="relative w-20">
+                          {limit > 0 && (
+                            <span className="text-[#E5E5E5] font-mono font-bold">
+                              {formatCurrency(limit, selectedCurrency)}
+                            </span>
+                          )}
+                          <div className="relative w-18 ml-1">
                             <input
                               type="number"
                               min="0"
                               step="25"
-                              value={limit}
+                              value={limit === 0 ? '' : limit}
+                              placeholder="No target"
                               onChange={(e) =>
                                 handleCategoryChange(cat.label, Number(e.target.value))
                               }
@@ -216,14 +247,16 @@ export const BudgetManager: React.FC<BudgetManagerProps> = ({
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="w-full bg-[#2A2A2A] h-1.5 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          isOver ? 'bg-[#CF6679]' : isNear ? 'bg-[#FFB74D]' : 'bg-[#BB86FC]'
-                        }`}
-                        style={{ width: `${Math.min(100, percentage)}%` }}
-                      />
-                    </div>
+                    {limit > 0 && (
+                      <div className="w-full bg-[#2A2A2A] h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-300 ${
+                            isOver ? 'bg-[#CF6679]' : isNear ? 'bg-[#FFB74D]' : 'bg-[#BB86FC]'
+                          }`}
+                          style={{ width: `${Math.min(100, percentage)}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 );
               }

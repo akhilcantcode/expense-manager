@@ -109,32 +109,52 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({ analytics, budget })
         <div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-[#9E9E9E] uppercase tracking-widest font-semibold mb-1">
-              Budget Remaining
+              {budget.monthlyTotalLimit > 0 ? "Budget Remaining" : "Budget Target"}
             </p>
-            <span className="text-xs font-mono font-bold text-[#BB86FC]">
-              {budgetUtilization.toFixed(0)}% used
-            </span>
+            {budget.monthlyTotalLimit > 0 ? (
+              <span className="text-xs font-mono font-bold text-[#BB86FC]">
+                {budgetUtilization.toFixed(0)}% used
+              </span>
+            ) : (
+              <span className="text-xs font-mono font-bold text-[#9E9E9E]">
+                Not Set
+              </span>
+            )}
           </div>
           <h2 className="text-3xl sm:text-4xl font-light text-[#E5E5E5] mt-1">
-            {formatCurrency(budgetRemaining, budget.currency)}
+            {budget.monthlyTotalLimit > 0
+              ? formatCurrency(budgetRemaining, budget.currency)
+              : "—"
+            }
           </h2>
         </div>
         <div className="mt-3 space-y-1.5">
-          <div className="w-full bg-[#2A2A2A] h-1.5 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${
-                budgetUtilization > 100
-                  ? 'bg-[#CF6679]'
-                  : budgetUtilization > 80
-                  ? 'bg-[#FFB74D]'
-                  : 'bg-[#BB86FC]'
-              }`}
-              style={{ width: `${Math.min(100, budgetUtilization)}%` }}
-            />
-          </div>
-          <p className="text-[10px] text-[#9E9E9E] truncate">
-            Left from {formatCurrency(budget.monthlyTotalLimit, budget.currency)} monthly budget
-          </p>
+          {budget.monthlyTotalLimit > 0 ? (
+            <>
+              <div className="w-full bg-[#2A2A2A] h-1.5 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    budgetUtilization > 100
+                      ? 'bg-[#CF6679]'
+                      : budgetUtilization > 80
+                      ? 'bg-[#FFB74D]'
+                      : 'bg-[#BB86FC]'
+                  }`}
+                  style={{ width: `${Math.min(100, budgetUtilization)}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-[#9E9E9E] truncate">
+                Left from {formatCurrency(budget.monthlyTotalLimit, budget.currency)} monthly budget
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="w-full bg-[#2A2A2A] h-1.5 rounded-full" />
+              <p className="text-[10px] text-[#9E9E9E] truncate">
+                Set a monthly budget to track spending goals.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

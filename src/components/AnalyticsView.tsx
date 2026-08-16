@@ -697,14 +697,20 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                   Budget Allocation Status
                 </span>
                 <p className="text-sm font-bold">
-                  {analytics.totalExpense <= budget.monthlyTotalLimit ? (
-                    <span className="text-[#03DAC6]">
-                      Within Limit ({((analytics.totalExpense / budget.monthlyTotalLimit) * 100).toFixed(0)}% used)
-                    </span>
+                  {budget.monthlyTotalLimit > 0 ? (
+                    analytics.totalExpense <= budget.monthlyTotalLimit ? (
+                      <span className="text-[#03DAC6]">
+                        Within Limit ({((analytics.totalExpense / budget.monthlyTotalLimit) * 100).toFixed(0)}% used)
+                      </span>
+                    ) : (
+                      <span className="text-[#CF6679]">
+                        Exceeded by{' '}
+                        {formatCurrency(analytics.totalExpense - budget.monthlyTotalLimit, budget.currency)}
+                      </span>
+                    )
                   ) : (
-                    <span className="text-[#CF6679]">
-                      Exceeded by{' '}
-                      {formatCurrency(analytics.totalExpense - budget.monthlyTotalLimit, budget.currency)}
+                    <span className="text-[#9E9E9E] font-normal">
+                      No Target Set
                     </span>
                   )}
                 </p>
