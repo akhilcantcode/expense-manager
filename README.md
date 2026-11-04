@@ -1,174 +1,118 @@
-# Expense Manager - Personal Budget & Charts
+# kharche — Personal Expense & Budget Manager
 
-Expense Manager is a modern, privacy-focused, client-side personal finance tracking application. It features real-time data visualization charts and integrates seamlessly with Google Sheets and Google Drive for cloud backups and cross-device synchronization.
-
-The application is built using a **local-first** approach: it remains fully functional offline, saves all your transactions locally, and uses Google OAuth via Firebase to securely sync data with a private Google Spreadsheet in your own Google Drive.
+A modern, high-performance personal finance tracking application built with **Next.js (App Router)**, **Neon Serverless PostgreSQL**, **Prisma ORM**, and **Clerk Authentication**.
 
 ---
 
-## 🏗️ Architectural Decisions
+## 🚀 Key Advantages Over Google Sheets
 
-### 1. Local-First & Optimistic UI
-*   **Decoupled State**: App state (`expenses`, `budget`, `sheetMeta`) is stored in React state and mirrored instantly to `localStorage`.
-*   **Offline Operation**: You can add, edit, or delete transactions without any internet connection. The app queues the changes and performs optimistic UI updates locally.
-*   **Background Sync**: When the network is available and the user is authenticated, the app automatically executes sheets-sync actions (e.g., adding rows, updating rows, deleting dimensions) in the background, minimizing UI blockages.
+1. **Persistent Sessions (No Broken Connections on Refresh)**:
+   - Clerk maintains secure, persistent session cookies across browser reloads, tabs, and devices.
+   - Say goodbye to lost OAuth in-memory tokens or broken spreadsheet connection popups.
 
-### 2. Client-Side REST Sheets Integration
-*   **No Dedicated Backend**: The application communicates directly with Google's v3 Drive and v4 Sheets APIs from the client browser. This eliminates the need for a custom server/database, maximizing user privacy and minimizing hosting costs.
-*   **Scoped Permissions**: Firebase Auth is configured to ask for selective, minimum required permissions:
-    *   `https://www.googleapis.com/auth/spreadsheets` (to view and manage spreadsheets the app interacts with)
-    *   `https://www.googleapis.com/auth/drive.file` (to search and create the specific app spreadsheet)
+2. **Serverless PostgreSQL (Neon DB)**:
+   - True ACID-compliant relational storage with sub-50ms query response times.
+   - Indexed by user and transaction date for instant dashboard rendering.
 
-### 3. Google Sheets as a Database
-*   **Row-Level Operations**: Instead of redownloading the entire sheet on every CRUD operation:
-    *   **Create**: Appends a row to the end of the sheet using the `append` API.
-    *   **Update**: Finds the matching row index (using `rowIndex` cached state or column-search) and updates only that range.
-    *   **Delete**: Issues a `deleteDimension` request via `batchUpdate` to remove the exact row.
-*   **Conflict Resolution**: Full dataset sync utilities (`push` and `pull` force options) are provided inside the settings panel to allow manual reconciliation when editing spreadsheets externally.
+3. **Type-Safe ORM (Prisma)**:
+   - Full TypeScript safety from database models down to client components.
+   - Easy migrations and database schema inspection with Prisma Studio.
+
+4. **Next.js App Router & Server Actions**:
+   - Zero-latency initial load: Server Components fetch user data directly during SSR.
+   - Optimistic UI updates with automatic server action revalidation.
 
 ---
 
-## 🔄 Application Flow & Lifecycles
+## 🛠️ Tech Stack
 
-### 🗺️ System Architecture
-
-```mermaid
-graph TD
-    User([User]) <--> ReactUI[Vite React UI]
-    ReactUI <--> LocalStorage[(Local Storage)]
-    ReactUI <--> FirebaseAuth[Firebase Google Auth]
-    FirebaseAuth -- Retrieves OAuth Token --> GoogleAuth[Google Auth Server]
-    ReactUI -- REST Calls with Token --> GoogleDrive[Google Drive API]
-    ReactUI -- CRUD Operations --> GoogleSheets[Google Sheets API]
-    GoogleDrive <--> UserSheets[(User's Google Sheet)]
-    GoogleSheets <--> UserSheets
-```
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
+- **Auth**: [Clerk](https://clerk.com/) (`@clerk/nextjs`)
+- **Database**: [Neon](https://neon.tech/) (Serverless Postgres)
+- **ORM**: [Prisma ORM 6](https://www.prisma.io/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Visualizations**: [Recharts](https://recharts.org/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
 ---
 
-### 🔑 Authentication & Sheet Connection flow
-1.  **On Startup**: The app reads cached configuration, budgets, and transactions from `localStorage`.
-2.  **Sign-In**: The user triggers Google Sign-in. Firebase opens a popup, authenticates the user, and fetches a Google OAuth2 access token.
-3.  **Discovery/Setup**:
-    *   The app queries Google Drive for an existing spreadsheet named `Personal Expenses - ExpenseManager`.
-    *   **If found**: It retrieves the sheet ID and downloads any existing transactions to sync them locally.
-    *   **If not found**: It creates a new spreadsheet, designs a custom schema (Header Row, freeze settings), and uploads any existing local transactions.
+## ⚙️ Quick Start Setup
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User
-    participant App as React App
-    participant FB as Firebase Auth
-    participant Drive as Google Drive API
-    participant Sheets as Google Sheets API
+### 1. Configure Environment Variables
 
-    User->>App: Click "Connect with Google"
-    App->>FB: signInWithPopup(provider)
-    FB-->>App: Return User & Access Token
-    App->>Drive: Query file name 'Personal Expenses - ExpenseManager'
-    alt File Exists
-        Drive-->>App: Return Spreadsheet ID
-        App->>Sheets: fetchExpensesFromSheet()
-        Sheets-->>App: Return Transactions Rows
-        App->>App: Update local state & LocalStorage
-    else File Doesn't Exist
-        Drive-->>App: No file found
-        App->>Sheets: Create Spreadsheet & Write Headers
-        Sheets-->>App: Return New Spreadsheet ID
-        App->>Sheets: syncFullDatasetToSheet() (upload local data)
-        App->>App: Store Spreadsheet Metadata locally
-    end
-```
-
----
-
-### 💾 Transaction Lifecycle (CRUD Sync)
-Whenever a user performs a write operation (Add, Edit, Delete):
-
-```mermaid
-graph TD
-    A[User triggers Write Action] --> B[Generate/Update item local state]
-    B --> C[Persist instantly to LocalStorage]
-    C --> D{Is Google account connected?}
-    D -- Yes --> E[Execute REST call to Google Sheets]
-    E -- Success --> F[Mark local item as syncedToSheet: true]
-    E -- Error --> G[Mark local item as syncedToSheet: false]
-    D -- No --> G
-```
-
-*   **Create**: Local state adds item -> `appendExpenseToSheet()` call -> updates local sync status.
-*   **Update**: Local state modifies item -> `updateExpenseInSheet()` call targeting specific row range -> updates local sync status.
-*   **Delete**: Local state removes item -> `deleteExpenseFromSheet()` calls `deleteDimension` API for the row -> updates local state.
-
----
-
-## 📂 Project Structure
+Create or open `.env.local` and add your database and authentication credentials:
 
 ```bash
-expense-manager/
-├── firebase-applet-config.json  # Firebase client credentials
-├── package.json                 # Core dependencies (React, Recharts, Tailwind v4, Lucide)
-├── vite.config.ts               # Vite configuration with Tailwind CSS plugin
+# Neon Serverless Postgres (from https://console.neon.tech)
+DATABASE_URL="postgresql://user:password@ep-sample-pooler.region.aws.neon.tech/neondb?sslmode=require"
+
+# Clerk Authentication (from https://dashboard.clerk.com -> API Keys)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
+
+# Clerk Route URLs
+NEXT_PUBLIC_CLERK_SIGN_IN_URL="/sign-in"
+NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL="/"
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL="/"
+```
+
+### 2. Push Schema to Neon Database
+
+Sync the Prisma schema (`prisma/schema.prisma`) directly with your Neon Postgres database:
+
+```bash
+npm run db:push
+```
+
+### 3. Start Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view your expense manager.
+
+---
+
+## 📂 Project Architecture
+
+```
+├── app/
+│   ├── globals.css                       # Dark theme aesthetic and color tokens
+│   ├── layout.tsx                        # Root layout wrapped in ClerkProvider
+│   ├── page.tsx                          # Server Component (SSR data prefetch)
+│   ├── sign-in/[[...sign-in]]/page.tsx   # Custom Clerk sign-in screen
+│   └── sign-up/[[...sign-up]]/page.tsx   # Custom Clerk sign-up screen
+├── components/
+│   └── Dashboard.tsx                     # Main interactive client dashboard
+├── lib/
+│   ├── prisma.ts                         # Singleton PrismaClient instance
+│   └── actions/
+│       ├── expenses.ts                   # Server actions for Expense CRUD
+│       └── budget.ts                     # Server actions for Budget settings
+├── prisma/
+│   └── schema.prisma                     # Prisma schema (Expense, BudgetConfig)
 ├── src/
-│   ├── main.tsx                 # Application entry point
-│   ├── App.tsx                  # Core state, sync orchestration, and routing
-│   ├── types.ts                 # TypeScript interfaces (ExpenseItem, FilterState, etc.)
-│   ├── index.css                # Tailwind global imports and variables
-│   ├── components/              # Modular UI Components
-│   │   ├── Header.tsx           # Brand header, user profiles, tab navigation
-│   │   ├── SummaryCards.tsx     # KPI metrics (Income, Expense, Savings, Budget Progress)
-│   │   ├── ExpenseList.tsx      # Multi-filter transaction search, action buttons, table view
-│   │   ├── AnalyticsView.tsx    # Interactive charts built with Recharts
-│   │   ├── BudgetManager.tsx    # Detailed category-wise budgeting settings
-│   │   ├── ExpenseModal.tsx     # Popup form for adding/editing transactions
-│   │   ├── DeleteConfirmModal.tsx # Safety validation modal
-│   │   └── SheetSettingsModal.tsx # Sync settings, URL links, force push/pull operations
-│   ├── services/                # External Integrations
-│   │   ├── firebaseAuth.ts      # Authentication wrapper and scopes setup
-│   │   ├── googleSheets.ts      # Sheets API wrappers (fetch, append, update, delete, clear)
-│   │   └── storage.ts           # LocalStorage helpers for offline persistence
-│   └── utils/
-│       └── helpers.ts           # Utilities: computation of analytics, filtering, currency, CSV exports
+│   ├── components/                       # Shared UI components
+│   │   ├── AnalyticsView.tsx             # Interactive charts & trend analysis
+│   │   ├── BudgetManager.tsx             # Category limits and targets
+│   │   ├── DeleteConfirmModal.tsx        # Safe deletion modal
+│   │   ├── ExpenseList.tsx               # Filterable & searchable transaction log
+│   │   ├── ExpenseModal.tsx              # Add / edit transaction modal
+│   │   ├── Header.tsx                    # Top navigation & Clerk UserButton
+│   │   └── SummaryCards.tsx              # Metric stat cards (Income/Expense/Savings)
+│   ├── types.ts                          # TypeScript types & interfaces
+│   └── utils/helpers.ts                  # Analytics compute, formatting, CSV export
+└── middleware.ts                         # Clerk authentication middleware
 ```
 
 ---
 
-## 🚀 Running Locally
+## 📊 Useful Commands
 
-### Prerequisites
-*   [Node.js](https://nodejs.org/) (v18 or higher recommended)
-*   [npm](https://www.npmjs.com/) or [bun](https://bun.sh/)
-
-### 🛠️ Setup Steps
-
-1.  **Install dependencies**:
-    ```bash
-    npm install
-    # or
-    bun install
-    ```
-
-2.  **Configuration**:
-    The project is pre-configured with a default Firebase Applet Sandbox in `firebase-applet-config.json` for immediate local authentication.
-    
-    If you wish to use your own Firebase and Google Cloud project:
-    *   Create a Firebase project.
-    *   Enable Google Sign-in provider.
-    *   Add the `https://www.googleapis.com/auth/spreadsheets` and `https://www.googleapis.com/auth/drive.file` scopes in your console configuration.
-    *   Replace values in [firebase-applet-config.json](firebase-applet-config.json) with your web app configuration credentials.
-
-3.  **Run Development Server**:
-    ```bash
-    npm run dev
-    ```
-    Open `http://localhost:3000` to view the application.
-
-4.  **Lint & Build**:
-    ```bash
-    # Run TypeScript validation
-    npm run lint
-
-    # Build production assets
-    npm run build
-    ```
+- `npm run dev`: Launch the local development server on port 3000.
+- `npm run build`: Validate Prisma types and build the production Next.js bundle.
+- `npm run db:push`: Push the Prisma schema directly to your Neon database without manual SQL.
+- `npm run db:studio`: Launch Prisma Studio GUI in your browser to inspect and edit database records.
+- `npm run lint`: Run TypeScript type-checking across the repository.
