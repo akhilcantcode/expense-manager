@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import {
   Search,
@@ -51,7 +53,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
               placeholder="Search expenses by title, merchant, notes or amount..."
               value={filter.search}
               onChange={(e) => onFilterChange({ ...filter, search: e.target.value })}
-              className="w-full pl-9 pr-4 py-2 bg-[#0A0A0A] border border-[#2A2A2A] rounded-lg text-xs sm:text-sm text-[#E5E5E5] placeholder-[#666666] focus:outline-none focus:border-[#BB86FC] transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-neutral-900 border border-neutral-800 rounded-lg text-xs sm:text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 transition-colors"
             />
           </div>
 
@@ -61,7 +63,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
               id="expenses-export-csv-btn"
               onClick={onExport}
               title="Export filtered records to CSV"
-              className="flex items-center space-x-1.5 px-3 py-2 bg-[#222222] hover:bg-[#2A2A2A] text-[#E5E5E5] border border-[#333333] rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors"
+              className="flex items-center space-x-1.5 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-800 rounded-lg text-xs font-medium transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export CSV</span>
@@ -69,44 +71,44 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
             <button
               id="expenses-add-new-btn"
               onClick={onAddNew}
-              className="flex items-center space-x-1.5 px-3.5 py-2 bg-[#BB86FC] hover:bg-[#A370DB] text-black rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-xs"
+              className="flex items-center space-x-1.5 px-3.5 py-2 bg-white text-black hover:bg-neutral-200 rounded-lg text-xs font-medium transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add Entry</span>
+              <span>Add entry</span>
             </button>
           </div>
         </div>
 
         {/* Filter Controls Row */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#222222] text-xs">
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-800 text-xs">
           {/* Type Toggle */}
-          <div className="inline-flex rounded-lg bg-[#0A0A0A] p-0.5 border border-[#2A2A2A]">
+          <div className="inline-flex rounded-lg bg-neutral-900 p-0.5 border border-neutral-800">
             <button
               onClick={() => onFilterChange({ ...filter, type: 'all' })}
-              className={`px-2.5 py-1 rounded-md transition-all font-semibold uppercase text-[11px] tracking-wider ${
+              className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
                 filter.type === 'all'
-                  ? 'bg-[#2A2A2A] text-white shadow-xs border border-[#3A3A3A]'
-                  : 'text-[#9E9E9E] hover:text-[#E5E5E5]'
+                  ? 'bg-neutral-800 text-white'
+                  : 'text-neutral-400 hover:text-white'
               }`}
             >
               All
             </button>
             <button
               onClick={() => onFilterChange({ ...filter, type: 'expense' })}
-              className={`px-2.5 py-1 rounded-md transition-all font-semibold uppercase text-[11px] tracking-wider ${
+              className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
                 filter.type === 'expense'
-                  ? 'bg-[#2A2A2A] text-[#CF6679] shadow-xs border border-[#3A3A3A]'
-                  : 'text-[#9E9E9E] hover:text-[#CF6679]'
+                  ? 'bg-neutral-800 text-[#e5484d]'
+                  : 'text-neutral-400 hover:text-[#e5484d]'
               }`}
             >
               Expenses
             </button>
             <button
               onClick={() => onFilterChange({ ...filter, type: 'income' })}
-              className={`px-2.5 py-1 rounded-md transition-all font-semibold uppercase text-[11px] tracking-wider ${
+              className={`px-2.5 py-1 rounded-md transition-colors text-xs font-medium ${
                 filter.type === 'income'
-                  ? 'bg-[#2A2A2A] text-[#03DAC6] shadow-xs border border-[#3A3A3A]'
-                  : 'text-[#9E9E9E] hover:text-[#03DAC6]'
+                  ? 'bg-neutral-800 text-[#c6f24e]'
+                  : 'text-neutral-400 hover:text-[#c6f24e]'
               }`}
             >
               Income
@@ -218,10 +220,10 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                         </h4>
                         {item.syncedToSheet ? (
                           <span
-                            title="Synced with Google Sheet"
-                            className="inline-flex text-[#03DAC6]"
+                            title="Saved to Neon Database"
+                            className="inline-flex text-[#c6f24e]"
                           >
-                            <FileSpreadsheet className="w-3.5 h-3.5" />
+                            <CheckCircle2 className="w-3.5 h-3.5" />
                           </span>
                         ) : null}
                       </div>
@@ -253,8 +255,8 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                   <div className="flex items-center space-x-3 sm:space-x-4 shrink-0">
                     <div className="text-right">
                       <span
-                        className={`text-sm sm:text-base font-bold font-mono ${
-                          isIncome ? 'text-[#03DAC6]' : 'text-[#E5E5E5]'
+                        className={`text-sm sm:text-base font-semibold tabular-nums ${
+                          isIncome ? 'text-[#c6f24e]' : 'text-neutral-100'
                         }`}
                       >
                         {isIncome ? '+' : '-'}
@@ -268,7 +270,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                         id={`edit-expense-${item.id}`}
                         onClick={() => onEdit(item)}
                         title="Edit transaction"
-                        className="p-1.5 text-[#9E9E9E] hover:text-[#BB86FC] hover:bg-[#2A2A2A] rounded-lg transition-colors"
+                        className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -276,7 +278,7 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
                         id={`delete-expense-${item.id}`}
                         onClick={() => onDelete(item)}
                         title="Delete transaction"
-                        className="p-1.5 text-[#9E9E9E] hover:text-[#CF6679] hover:bg-[#2A1818] rounded-lg transition-colors"
+                        className="p-1.5 text-neutral-400 hover:text-[#e5484d] hover:bg-neutral-800 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -288,17 +290,17 @@ export const ExpenseList: React.FC<ExpenseListProps> = ({
           </div>
         ) : (
           <div className="py-14 px-4 text-center">
-            <div className="w-12 h-12 rounded-xl bg-[#202020] border border-[#2A2A2A] text-[#9E9E9E] flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 flex items-center justify-center mx-auto mb-3">
               <Search className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-semibold text-[#E5E5E5]">No transactions found</h3>
-            <p className="text-xs text-[#9E9E9E] max-w-xs mx-auto mt-1">
+            <h3 className="text-base font-medium text-white">No transactions found</h3>
+            <p className="text-xs text-neutral-400 max-w-xs mx-auto mt-1">
               No records match your active filters or date range. Try clearing filters or add a new
               transaction.
             </p>
             <button
               onClick={onAddNew}
-              className="mt-4 inline-flex items-center space-x-1.5 px-4 py-2 bg-[#BB86FC] text-black rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#A370DB] transition-colors"
+              className="mt-4 inline-flex items-center space-x-1.5 px-4 py-2 bg-white text-black rounded-lg text-xs font-medium hover:bg-neutral-200 transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Transaction</span>

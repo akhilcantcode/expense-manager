@@ -47,42 +47,40 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
   return (
     <div
       id="sheet-settings-modal-backdrop"
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isSyncing) onClose();
       }}
     >
       <div
         id="sheet-settings-card"
-        className="bg-[#161616] rounded-xl max-w-lg w-full p-6 shadow-2xl border border-[#2A2A2A] text-[#E5E5E5]"
+        className="bg-[#111111] rounded-lg max-w-lg w-full p-6 border border-neutral-800 text-neutral-100"
       >
-        <div className="flex items-center justify-between pb-4 border-b border-[#2A2A2A]">
+        <div className="flex items-center justify-between pb-4 border-b border-neutral-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-lg bg-[#182A24] border border-[#1E4035] text-[#03DAC6] flex items-center justify-center">
-              <FileSpreadsheet className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-md bg-neutral-900 border border-neutral-800 text-[#c6f24e] flex items-center justify-center">
+              <FileSpreadsheet className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-xs text-[#9E9E9E] uppercase tracking-widest font-semibold">
-                Cloud Integration
-              </p>
-              <h3 className="text-lg font-light text-[#E5E5E5] mt-0.5">Google Sheets Settings</h3>
+              <h3 className="text-base font-semibold text-neutral-100">Google Sheets Settings</h3>
+              <p className="text-xs text-neutral-400 mt-0.5">Manage live two-way cloud synchronization</p>
             </div>
           </div>
           <button
             id="sheet-settings-close-btn"
             onClick={onClose}
-            className="p-2 text-[#9E9E9E] hover:text-[#E5E5E5] hover:bg-[#2A2A2A] rounded-lg transition-colors"
+            className="p-1.5 text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 rounded-md transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {syncStatus && (
           <div
-            className={`mt-4 p-3 rounded-lg text-xs font-semibold ${
+            className={`mt-4 p-3 rounded-md text-xs font-medium border ${
               syncStatus.startsWith('Error')
-                ? 'bg-[#2A1518] text-[#CF6679] border border-[#441C22]'
-                : 'bg-[#182A24] text-[#03DAC6] border border-[#1E4035]'
+                ? 'bg-[#241215] text-[#e5484d] border-[#3d191e]'
+                : 'bg-[#182312] text-[#c6f24e] border-[#293d18]'
             }`}
           >
             {syncStatus}
@@ -91,26 +89,26 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
 
         <div className="mt-4 space-y-4 text-xs">
           {/* Status block */}
-          <div className="p-4 bg-[#1F1F1F] rounded-lg border border-[#2A2A2A] space-y-2.5">
+          <div className="p-4 bg-neutral-900 rounded-md border border-neutral-800 space-y-2.5">
             <div className="flex justify-between items-center">
-              <span className="text-[#9E9E9E]">Status</span>
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#182A24] text-[#03DAC6] border border-[#1E4035]">
-                <CheckCircle2 className="w-3 h-3 mr-1" /> Active & Synced
+              <span className="text-neutral-400">Status</span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#182312] text-[#c6f24e] border border-[#293d18]">
+                <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Active &amp; Synced
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[#9E9E9E]">Account</span>
-              <span className="font-semibold text-[#E5E5E5]">{userEmail || 'Connected User'}</span>
+              <span className="text-neutral-400">Account</span>
+              <span className="font-medium text-neutral-200">{userEmail || 'Connected User'}</span>
             </div>
             {sheetMeta && (
               <>
                 <div className="flex justify-between items-center">
-                  <span className="text-[#9E9E9E]">Spreadsheet</span>
-                  <span className="font-medium text-[#E5E5E5]">Personal Expenses - ExpenseManager</span>
+                  <span className="text-neutral-400">Spreadsheet</span>
+                  <span className="font-medium text-neutral-200">Personal Expenses - ExpenseManager</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-[#9E9E9E]">Last Sync</span>
-                  <span className="text-[#9E9E9E] font-mono">
+                  <span className="text-neutral-400">Last Sync</span>
+                  <span className="text-neutral-300 tabular-nums">
                     {sheetMeta.lastSyncedAt
                       ? new Date(sheetMeta.lastSyncedAt).toLocaleTimeString([], {
                           hour: '2-digit',
@@ -130,16 +128,16 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
               href={sheetMeta.spreadsheetUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 bg-[#03DAC6] text-black rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#00BFA5] transition-colors shadow-xs"
+              className="w-full flex items-center justify-center space-x-2 py-2.5 px-4 bg-white text-black rounded-md text-xs font-semibold hover:bg-neutral-200 transition-colors"
             >
               <span>Open in Google Sheets</span>
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="w-3.5 h-3.5" />
             </a>
           )}
 
           {/* Sync controls */}
           <div className="pt-1">
-            <span className="font-semibold text-[#9E9E9E] uppercase tracking-wider text-xs block mb-2">
+            <span className="font-medium text-neutral-300 text-xs block mb-2">
               Manual Synchronization
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -148,9 +146,9 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
                 type="button"
                 disabled={isSyncing}
                 onClick={() => handleSyncAction('pull')}
-                className="flex items-center justify-center space-x-1.5 p-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#2A2A2A] text-[#E5E5E5] rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                className="flex items-center justify-center space-x-1.5 p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-200 rounded-md text-xs font-medium transition-colors disabled:opacity-50"
               >
-                <DownloadCloud className="w-4 h-4 text-[#BB86FC]" />
+                <DownloadCloud className="w-4 h-4 text-neutral-400" />
                 <span>Pull from Sheet</span>
               </button>
 
@@ -159,13 +157,13 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
                 type="button"
                 disabled={isSyncing}
                 onClick={() => handleSyncAction('push')}
-                className="flex items-center justify-center space-x-1.5 p-2.5 bg-[#222222] hover:bg-[#2A2A2A] border border-[#2A2A2A] text-[#E5E5E5] rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                className="flex items-center justify-center space-x-1.5 p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-200 rounded-md text-xs font-medium transition-colors disabled:opacity-50"
               >
-                <UploadCloud className="w-4 h-4 text-[#BB86FC]" />
+                <UploadCloud className="w-4 h-4 text-neutral-400" />
                 <span>Push to Sheet</span>
               </button>
             </div>
-            <p className="text-[11px] text-[#777777] mt-2">
+            <p className="text-xs text-neutral-500 mt-2">
               Changes you make in this app are automatically mirrored directly to your connected Google Sheet.
             </p>
           </div>
@@ -175,7 +173,7 @@ export const SheetSettingsModal: React.FC<SheetSettingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-[#2A2A2A] text-[#E5E5E5] hover:bg-[#333333] border border-[#3A3A3A] rounded-lg text-xs font-bold uppercase tracking-wider"
+            className="px-3.5 py-2 bg-neutral-800 text-neutral-200 hover:bg-neutral-700 border border-neutral-700 rounded-md text-xs font-medium"
           >
             Close
           </button>
