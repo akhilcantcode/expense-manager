@@ -1,0 +1,35 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Expense {
+  id            String   @id @default(cuid())
+  userId        String
+  date          String   // Format: YYYY-MM-DD
+  title         String
+  amount        Float
+  type          String   @default("expense") // 'expense' | 'income'
+  category      String
+  paymentMethod String
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId, date])
+}
+
+model BudgetConfig {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  monthlyTotalLimit Float    @default(50000)
+  currency          String   @default("₹")
+  categoryBudgets   Json     // key-value map of category -> limit
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
