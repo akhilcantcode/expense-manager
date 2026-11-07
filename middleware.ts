@@ -6,6 +6,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/health(.*)',
+  '/__clerk(.*)',
 ]);
 
 export default function middleware(request: any, event: any) {
